@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Quiz Results</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2d0f4d">
+
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#2d0f4d;">
+
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="index.html">Codeine Awareness</a>
+
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+<div class="collapse navbar-collapse" id="navbarNav">
+
+<ul class="navbar-nav ms-auto">
+
+<li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+<li class="nav-item"><a class="nav-link" href="effects.html">Effects</a></li>
+<li class="nav-item"><a class="nav-link" href="sideeffects.html">Side Effects</a></li>
+<li class="nav-item"><a class="nav-link" href="statistics.html">Statistics</a></li>
+<li class="nav-item"><a class="nav-link" href="help.html">Help</a></li>
+<li class="nav-item"><a class="nav-link" href="quiz.html">Quiz</a></li>
+
+</ul>
+
+</div>
+
+</div>
+
+</nav>
+
+<div class="container section">
+
+<div class="row">
+
+<div class="col-lg-10 mx-auto">
+
+<h2 class="section-title text-center mb-5">Quiz Results Tracker</h2>
+
+<div id="resultsContainer">
+
+<div class="text-center text-muted">
+
+<p>Loading results...</p>
+
+</div>
+
+</div>
+
+<div class="mt-5 text-center">
+
+<a href="quiz.html" class="btn btn-primary">Back to Quiz</a>
+<button onclick="clearAllScores()" class="btn btn-danger ms-2">Clear All Scores</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+Drug Awareness Project
+
+</div>
+
+<script>
+function displayResults() {
+  const resultsContainer = document.getElementById("resultsContainer");
+  const scores = JSON.parse(localStorage.getItem("quizScores")) || [];
+
+  if (scores.length === 0) {
+    resultsContainer.innerHTML = `<div class="alert alert-info text-center">No quiz results yet. <a href="quiz.html">Take the quiz</a></div>`;
+    return;
+  }
+
+  // Calculate stats
+  const totalScores = scores.length;
+  const avgPercentage = Math.round(
+    scores.reduce((sum, s) => sum + s.percentage, 0) / scores.length
+  );
+  const highestScore = Math.max(...scores.map(s => s.percentage));
+  const lowestScore = Math.min(...scores.map(s => s.percentage));
+
+  // Sort by percentage descending
+  const sortedScores = [...scores].sort((a, b) => b.percentage - a.percentage);
+
+  let html = `
+    <div class="row mb-5">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <h6 class="text-muted">Total Participants</h6>
+            <h3 style="color:#2d0f4d;">${totalScores}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <h6 class="text-muted">Average Score</h6>
+            <h3 style="color:#2d0f4d;">${avgPercentage}%</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <h6 class="text-muted">Highest Score</h6>
+            <h3 style="color:#2d0f4d;">${highestScore}%</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center">
+          <div class="card-body">
+            <h6 class="text-muted">Lowest Score</h6>
+            <h3 style="color:#2d0f4d;">${lowestScore}%</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead style="background-color:#2d0f4d; color:white;">
+          <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Percentage</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  sortedScores.forEach((result, index) => {
+    const statusBadge = result.percentage >= 80 
+      ? '<span class="badge bg-success">Excellent</span>'
+      : result.percentage >= 60
+      ? '<span class="badge bg-info">Good</span>'
+      : '<span class="badge bg-warning">Needs Work</span>';
+
+    html += `
+      <tr>
+        <td><strong>${index + 1}</strong></td>
+        <td>${result.name}</td>
+        <td>${result.score}/${result.total}</td>
+        <td><strong>${result.percentage}%</strong></td>
+        <td>${statusBadge}</td>
+        <td><small class="text-muted">${result.date}</small></td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  resultsContainer.innerHTML = html;
+}
+
+function clearAllScores() {
+  if (confirm("Are you sure you want to clear ALL quiz scores? This cannot be undone.")) {
+    localStorage.removeItem("quizScores");
+    displayResults();
+  }
+}
+
+displayResults();
+</script>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
